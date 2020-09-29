@@ -136,15 +136,20 @@ func mergeWithExistingRRSet(
 	hosted_zone_id string,
 	op C.enum_r53dbDMLOp,
 ) *route53.ResourceRecordSet {
-	// First, some sanity checks (none of those statements will 'return' successfully)
+
+	// Easy path: If there's no existingRRSet, then there's nothing to merge.
 
 	if op == C.DML_INSERT {
 		if existingRRSet == nil {
 			return newRow
 		}
+	}
 
+	// First, some sanity checks (none of those statements will 'return' successfully)
+
+	if op == C.DML_INSERT {
 		if existingRRSet.AliasTarget != nil {
-			error("Cannot INSERT with AliasTarget: Name already exists")
+			error("Found existing RRSet with AliasTarget -- did you mean to UPDATE?")
 			return nil
 		}
 	}
@@ -167,13 +172,15 @@ func mergeWithExistingRRSet(
 			return nil
 		}
 
-		if *existingRRSet.TTL == *newRow.TTL {
-			if oldRow != nil {
-				*oldRow.TTL = *newRow.TTL
+		if newRow.AliasTarget == nil {
+			if *existingRRSet.TTL == *newRow.TTL {
+				if oldRow != nil {
+					*oldRow.TTL = *newRow.TTL
+				}
+			} else {
+				notice(fmt.Sprintf("Rows added to an existing RRSet cannot have a different TTL; " +
+				"using the RRSet's TTL (%d) instead", *existingRRSet.TTL))
 			}
-		} else {
-			notice(fmt.Sprintf("Rows added to an existing RRSet cannot have a different TTL; " +
-			"using the RRSet's TTL (%d) instead", *existingRRSet.TTL))
 		}
 	}
 
