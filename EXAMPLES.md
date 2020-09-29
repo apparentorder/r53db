@@ -1,6 +1,6 @@
 # More examples of r53db usage
 
-###### Add IPv6 to ALIAS Targets
+### Add IPv6 to ALIAS Targets
 
 As you are a good net citizen, you're keen on adding IPv6 support to your public-facing services!
 You gotta start somewhere, you know. And it's the *only* place where AWS *lets* you start.
@@ -34,7 +34,7 @@ postgres-# returning name, type, at_dns_name;
 (4 rows)
 ```
 
-###### Comparing different zones
+### Comparing different zones
 
 Let's create an example where we have a few `A` entries in different Hosted Zones:
 ```
@@ -60,7 +60,7 @@ postgres-# inner join route53.route53_db zone_b using (data);
 (1 row)
 ```
 
-###### Using inet operators
+### Using inet operators
 
 PostgreSQL has a data type for IP addresses, `inet`. You can use it, for example, to select
 addresses that are contained in specific CIDR blocks:
@@ -85,7 +85,7 @@ postgres-# where type='AAAA' and data::inet <<= '2001:db8::/64';
 (2 rows)
 ```
 
-###### Updating ALIAS Targets
+### Updating ALIAS Targets
 
 You can `UPDATE` ALIAS Targets just as well, either to a completely different `hosted_zone_id`, or
 toggle individual options:
@@ -101,6 +101,24 @@ UPDATE 1
 ```
 
 Of course, `at_evaluate_target_health` is the only option currently supported... but that might change, of course.
+
+### Inserting TXT records
+
+Just like in BIND Zone Files, TXT records have to be in double-quotes, which makes it a bit annoying to type
+in PostgreSQL:
+```
+postgres=# insert into route53.cmdu_de (name, type, data)
+postgres-# values
+postgres-# ('foo.cmdu.de', 'TXT', '"foobar"'),
+postgres-# ('bar.cmdu.de', 'TXT', format('"test: %s"', random()))
+postgres-# returning name, type, ttl, data;
+
+    name     | type | ttl |            data            
+-------------+------+-----+----------------------------
+ foo.cmdu.de | TXT  | 300 | "foobar"
+ bar.cmdu.de | TXT  | 300 | "test: 0.4357084824032178"
+(2 rows)
+```
 
 ## Other examples?
 
