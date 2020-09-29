@@ -4,30 +4,27 @@
 
 It provides read and write access to the AWS Route53 Database API via standard SQL semantics.
 
-### Demo
+## Demo
 
 For several examples, see [EXAMPLES.md](EXAMPLES.md).
 
-Many folks like video, and I like [asciinema](https://asciinema.org), so here we go:
+Many folks prefer video, and I like [asciinema](https://asciinema.org), so here we go:
 
-<!--
-<script id="asciicast-e50O6FMUkU2pmZu30xMHuBRsJ" src="https://asciinema.org/a/e50O6FMUkU2pmZu30xMHuBRsJ.js" data-speed="5" data-cols="80" data-rows="30" async></script>
--->
+<script id="asciicast-e50O6FMUkU2pmZu30xMHuBRsJ" src="https://asciinema.org/a/e50O6FMUkU2pmZu30xMHuBRsJ.js" data-speed="2" data-cols="80" data-rows="30" async></script>
 
-### Features
+## Features
 
-r53db supports reading (`SELECT`) and writing (`INSERT`/`UPDATE`/`DELETE`) to your Route53 Database for:
-
-- Simple records
-- [ALIAS targets](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html) (including Health Checks)
+r53db supports reading (`SELECT`) and writing (`INSERT`/`UPDATE`/`DELETE`) to your Route53 Database for simple records and [ALIAS Targets](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html) (including Health Checks).
 
 More advanced features like weights, geo-location etc. are not supported... *yet*.
+
+## Getting started
 
 ### Prerequisites
 
 You'll need:
 
-- AWS environment (a working `~/.aws/config`, an assigned Instance Role etc.) with the necessary permissions (see below)
+- An AWS environment (working `~/.aws/config` or assigned Instance Role etc.) with the necessary permissions (see below)
 - Golang 1.13+
 - AWS Go SDK v2
 - PostgreSQL 9.6+, including `pg_config` and development files (headers)
@@ -38,11 +35,12 @@ r53db has been successfully tested on:
 - Amazon Linux 2
 - Debian Buster
 - Ubuntu Focal 20.04
-- PostgreSQL Versions 9.6 up to 13
 
-Other OS might work as well.
+Other OS should work as well, if they meet the above list.
 
-##### IAM Permissions for Route53
+You'll be happy to know that it's working on 64-bit ARM as well, so you can use those nice [AWS Graviton](https://aws.amazon.com/ec2/graviton/) instances!
+
+### IAM Permissions for Route53
 
 The following permissions are required:
 
@@ -92,11 +90,11 @@ IMPORT FOREIGN SCHEMA dummy FROM SERVER route53 INTO route53;
 
 The schema name `route53` is just a suggestion, you can change it if you like (or don't create a separate schema and import into the default  `public` schema).
 
-The `IMPORT FOREIGN SCHEMA` command will `CREATE FOREIGN TABLE` for each Hosted Zone in your Route53 Database. DNS Names are adjusted to be easy-to-use PostgreSQL table names (e.g. the Hosted Zone `example.com` would become `example_com`).
+The `IMPORT FOREIGN SCHEMA` command will create a Foreign Table for each Hosted Zone in your Route53 Database. DNS Names are adjusted to be easy-to-use PostgreSQL table names (e.g. the Hosted Zone `example.com` would become `example_com`).
 
 Run `\dE+ route53.` (note the terminal `.`) afterwards to verify that the foreign tables have been added.
 
-##### OS-specific instructions
+### OS-specific instructions
 
 These instructions assume that PostgreSQL is already installed. Adjust as necessary.
 
@@ -152,4 +150,26 @@ git clone https://github.com/apparentorder/r53db.git
 cd r53db
 make clean all install
 ```
+
+## Misc
+
+This project was born from a [silly running gag](https://www.lastweekinaws.com/podcast/aws-morning-brief/whiteboard-confessional-route-53-db/).
+
+In that spirit, this project was meant as a gag as well. Unfortunately, I've severely underestimated how much time I'd have to invest if I make bad design decisions (for example, rolling my own in Golang, instead of doing the Right Thing and using [Multicorn](https://multicorn.org)). So now we're here and it feels more like a project than like a gag.
+
+And who knows -- I can actually imagine this being useful in some contexts, like the use-case described in that link. After all, if you have a lot of configuration data in PostgreSQL anyway, it's a small jump from there to maintaining DNS data as well.
+
+Either way, let me know if you find this useful at all!
+
+### Prior Art
+
+Similar projects that I'm aware of:
+
+- https://github.com/craftyphotons/ten34
+
+I'm sure there's more.
+
+## Contact
+
+I'm trying to get used to Twitter as [@apparentorder](https://twitter.com/apparentorder). Or try legacy message delivery using apparentorder@neveragain.de. Also I'm old enough to use IRC -- I'm hiding somewhere in `##aws` (Freenode) as well.
 
