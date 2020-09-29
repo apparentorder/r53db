@@ -10,7 +10,7 @@ For several examples, see [EXAMPLES.md](EXAMPLES.md).
 
 Many folks prefer video, and I like [asciinema](https://asciinema.org), so here we go:
 
-<script id="asciicast-e50O6FMUkU2pmZu30xMHuBRsJ" src="https://asciinema.org/a/e50O6FMUkU2pmZu30xMHuBRsJ.js" data-speed="2" data-cols="80" data-rows="30" async></script>
+[![asciicast](https://asciinema.org/a/RqO7mJeY7UgTTgJN68i7iTAyP.svg)](https://asciinema.org/a/RqO7mJeY7UgTTgJN68i7iTAyP?speed=2)
 
 ## Features
 
@@ -94,9 +94,9 @@ The `IMPORT FOREIGN SCHEMA` command will create a Foreign Table for each Hosted 
 
 Run `\dE+ route53.` (note the terminal `.`) afterwards to verify that the foreign tables have been added.
 
-### OS-specific instructions
+### OS-specific hints
 
-These instructions assume that PostgreSQL is already installed. Adjust as necessary.
+These hints assume that PostgreSQL is already installed. Adjust as necessary.
 
 Afterwards continue with the in-database installation (see above).
 
@@ -171,5 +171,5 @@ I'm sure there's more.
 
 ## Contact
 
-I'm trying to get used to Twitter as [@apparentorder](https://twitter.com/apparentorder). Or try legacy message delivery using apparentorder@neveragain.de. Also I'm old enough to use IRC -- I'm hiding somewhere in `##aws` (Freenode) as well.
+I'm trying to get used to Twitter as [@apparentorder](https://twitter.com/apparentorder). Or try legacy message delivery using apparentorder@neveragain.de. Also I'm old enough to use IRC -- I'm hiding somewhere in `##aws` (Freenode).
 
