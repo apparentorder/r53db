@@ -108,7 +108,14 @@ func getExistingRRSet(rname string, rtype route53.RRType, hosted_zone_id string)
 		return nil;
 	}
 
+	// Route53 might return entries that are *after* what we're looking
+	// for. That means there was no match.
+
 	if *resp.ResourceRecordSets[0].Name != rname {
+		return nil
+	}
+
+	if resp.ResourceRecordSets[0].Type != rtype {
 		return nil
 	}
 

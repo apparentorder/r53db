@@ -1,0 +1,21 @@
+# regression test:
+# when INSERTing a NEW RRSet,
+# getExistingRRSet() might erroneously pick up on some other RRSet
+# with the same name, but a different type. this might lead to
+# the "Inconsistent AliasTarget use in new/existing data" error.
+
+psql -c "
+	INSERT INTO r53db.route53_db (name, type, data)
+	VALUES ('test110.route53.db.', 'NS', 'foo.example.com.')
+"
+
+psql -c "
+	INSERT INTO r53db.route53_db (name, type, data)
+	VALUES ('test110.route53.db.', 'A', '10.0.0.0')
+"
+
+psql -c "
+	INSERT INTO r53db.route53_db (name, type, at_dns_name, at_hosted_zone_id)
+	VALUES ('test110.route53.db.', 'AAAA', 's3-website.eu-central-1.amazonaws.com.', 'Z21DNDUVLTQW6Q');
+"
+
