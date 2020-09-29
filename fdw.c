@@ -255,8 +255,6 @@ void r53dbBeginForeignModify(
 		return;
 	}
 
-	// Pg expects a List node as fdw_private, so let's wrap our state struct
-	// in a single-element List.
 	r53dbModifyState *modifyState = palloc0(sizeof(r53dbModifyState));
 
 	modifyState->operation = mtstate->operation;
@@ -282,6 +280,8 @@ void r53dbBeginForeignModify(
 		}
 	}
 
+	// Pg expects a List node as fdw_private, so let's wrap our state struct
+	// in a single-element List.
 	rinfo->ri_FdwState = lappend(NIL, modifyState);
 }
 
