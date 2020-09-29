@@ -1,8 +1,10 @@
 # Route53 Database access from PostgreSQL
 
-*r53db* is a [Foreign Data Wrapper](https://wiki.postgresql.org/wiki/Foreign_data_wrappers) for PostgreSQL.
+*r53db* is a Foreign Data Wrapper for PostgreSQL that enables you to access AWS Route53 Database Zones like SQL tables.
 
-It provides read and write access to the AWS Route53 Database API via standard SQL semantics.
+*r53db* supports reading from (`SELECT`) and writing to (`INSERT`/`UPDATE`/`DELETE`) your Route53 Database for simple records and [ALIAS Targets](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html).
+
+More advanced Route53 Database features like weights, geo-location etc. are not supported... *yet*!
 
 ## Demo
 
@@ -11,12 +13,6 @@ For several examples, see [EXAMPLES.md](EXAMPLES.md).
 Many folks prefer video, and I like [asciinema](https://asciinema.org), so here we go:
 
 [![asciicast](https://asciinema.org/a/RqO7mJeY7UgTTgJN68i7iTAyP.svg)](https://asciinema.org/a/RqO7mJeY7UgTTgJN68i7iTAyP?speed=2)
-
-## Features
-
-r53db supports reading (`SELECT`) and writing (`INSERT`/`UPDATE`/`DELETE`) to your Route53 Database for simple records and [ALIAS Targets](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html) (including Health Checks).
-
-More advanced features like weights, geo-location etc. are not supported... *yet*.
 
 ## Getting started
 
