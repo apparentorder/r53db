@@ -5,9 +5,9 @@
 
 (
 	psql -c "DROP SCHEMA r53db CASCADE"
-	psql -c "DROP SERVER r53db"
-	psql -c "DROP EXTENSION r53db"
-	psql -c "DROP FOREIGN DATA WRAPPER r53db"
+	psql -c "DROP SERVER r53db CASCADE"
+	psql -c "DROP EXTENSION r53db CASCADE"
+	psql -c "DROP FOREIGN DATA WRAPPER r53db CASCADE"
 	psql -c "DROP FUNCTION r53db_fdw_handler()"
 ) \
 > /dev/null 2>&1
