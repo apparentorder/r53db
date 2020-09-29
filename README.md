@@ -171,5 +171,7 @@ I'm sure there's more.
 
 ## Contact
 
-I'm trying to get used to Twitter as [@apparentorder](https://twitter.com/apparentorder). Or try legacy message delivery using apparentorder@neveragain.de. Also I'm old enough to use IRC -- I'm hiding somewhere in `##aws` (Freenode).
+For suggestions, bugs, pull requests etc. please use [Github](https://github.com/apparentorder/r53db).
+
+For everything else: I'm trying to get used to Twitter as [@apparentorder](https://twitter.com/apparentorder). Or try legacy message delivery using apparentorder@neveragain.de. Also I'm old enough to use IRC -- I'm hiding somewhere in `##aws` (Freenode).
 
