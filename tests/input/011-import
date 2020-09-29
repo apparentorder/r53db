@@ -1,0 +1,6 @@
+psql -c "
+	IMPORT FOREIGN SCHEMA dummy
+	FROM SERVER r53db
+	INTO r53db
+"
+

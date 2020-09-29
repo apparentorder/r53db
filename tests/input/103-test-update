@@ -1,0 +1,6 @@
+psql -Aqt -c "
+		UPDATE r53db.route53_db
+		SET data = replace(data, '10', '11')
+		WHERE name ~ '^test.route53' AND type='A' AND data='10.53.53.59'
+		RETURNING data
+"

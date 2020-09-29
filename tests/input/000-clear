@@ -1,0 +1,13 @@
+# Pg9.6 does not support DROP FUNCTION ... CASCADE.
+#
+# Also, each statement needs to be its own psql
+# invokation so errors don't abort the remining commands */
+
+(
+	psql -c "DROP SCHEMA r53db CASCADE"
+	psql -c "DROP SERVER r53db"
+	psql -c "DROP EXTENSION r53db"
+	psql -c "DROP FOREIGN DATA WRAPPER r53db"
+	psql -c "DROP FUNCTION r53db_fdw_handler()"
+) \
+> /dev/null 2>&1

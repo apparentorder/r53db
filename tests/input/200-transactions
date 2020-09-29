@@ -1,0 +1,6 @@
+psql -c "
+	BEGIN;
+
+	DELETE FROM r53db.route53_db
+	WHERE false;
+"

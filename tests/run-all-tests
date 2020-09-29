@@ -1,0 +1,85 @@
+#!/bin/sh
+
+set -e
+
+# We support all releases that are supported by Postgres:
+# https://www.postgresql.org/support/versioning/
+# ... except for 9.5, because it will die soon and I'm too lazy
+# to look into the build errors it produces.
+
+R53DB_TEST_VERSIONS="${R53DB_TEST_VERSIONS-13.0 12.4 11.9 10.14 9.6.19}"
+
+BASE=~/tmp/r53db_tests
+
+SOURCE=$(pwd)
+
+if ! test -e "$SOURCE/fdw.h"; then
+	if test -e "$SOURCE/../fdw.h"; then
+		SOURCE="$SOURCE/.."
+	else
+		echo "Must be run from r53db source directory." >&2
+		exit 64
+	fi
+fi
+
+if ! curl --help >/dev/null; then
+	echo "no curl?" >&2
+	exit 1
+fi
+
+if ! aws sts get-caller-identity >/dev/null; then
+	echo "no awscli or no valid instance role?" >&2
+	exit 1
+fi
+
+if ! test -d "$BASE"; then
+	mkdir -pv "$BASE"
+fi
+
+for version in $R53DB_TEST_VERSIONS; do
+	echo "------------------------------------------------------------------------"
+	echo ">>> Testing pg$version ..."
+	echo "------------------------------------------------------------------------"
+
+	if ! test -d "$BASE/pg$version"; then
+		mkdir -v "$BASE/pg$version"
+		pushd "$BASE/pg$version"
+
+		curl -o "pg$version.tgz" "https://ftp.postgresql.org/pub/source/v$version/postgresql-$version.tar.gz"
+		tar zxfv "pg$version.tgz"
+		pushd "postgresql-$version"
+
+		export CFLAGS="-g -O0"
+		./configure --prefix="$BASE/pg$version"  --enable-debug --enable-cassert
+		make -j8 all
+		make install
+
+		popd
+		popd
+	fi
+
+	PGDATABASE=postgres
+	PGPORT=54321
+	export PGDATABASE PGPORT
+
+	if ! test -d "$BASE/pg$version/db"; then
+		"$BASE/pg$version/bin/initdb" "$BASE/pg$version/db"
+	fi
+
+	"$BASE/pg$version/bin/pg_ctl" -D "$BASE/pg$version/db" -o-k/tmp -l /dev/null start
+
+	trap "$BASE/pg$version/bin/pg_ctl -D $BASE/pg$version/db stop" SIGINT SIGTERM EXIT
+
+	PG_CONFIG="$BASE/pg$version/bin/pg_config"
+	PSQL="$BASE/pg$version/bin/psql -h /tmp"
+	export PATH PG_CONFIG
+
+	make -C "$SOURCE" clean || true
+	make -C "$SOURCE" all install
+
+	$(dirname $0)/test
+
+	trap - SIGINT SIGTERM EXIT
+	"$BASE/pg$version/bin/pg_ctl" -D "$BASE/pg$version/db" stop
+done
+

@@ -1,0 +1,11 @@
+psql -Aqt -c "
+	/* query to invoke multiple overlapping ForeignScans */
+	SELECT type
+	FROM r53db.route53_db o
+	WHERE data = (
+		SELECT DISTINCT a.data
+		FROM r53db.route53_db a
+		CROSS JOIN r53db.route53_db b
+		WHERE a.type='SOA'
+	)
+"

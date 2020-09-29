@@ -1,0 +1,7 @@
+psql -c "
+	INSERT INTO r53db.route53_db
+	(name, type, data)
+	SELECT 'test.route53.db', 'A', '10.53.53.' || (53 + s)
+	FROM generate_series(0, 9) s
+"
+

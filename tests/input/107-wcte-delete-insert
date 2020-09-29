@@ -1,0 +1,12 @@
+psql -Aqt -c "
+	WITH wcte_delete AS (
+		DELETE FROM r53db.route53_db
+		WHERE name ~ '^test\.route53'
+		RETURNING *
+	)
+
+	INSERT INTO r53db.route53_db (name, type, data)
+	SELECT replace(name, 'test', 'testtest'), type, data
+	FROM wcte_delete
+	RETURNING name
+"

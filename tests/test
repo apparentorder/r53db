@@ -1,0 +1,20 @@
+#!/bin/sh
+
+OUTPUT=$(mktemp /tmp/test.XXXXXX) || exit 69
+BASE=$(dirname $0)
+
+trap "rm -f $OUTPUT" SIGINT SIGTERM EXIT
+
+for testinput in $BASE/input/*; do
+	test=$(basename "$testinput")
+
+	echo "Test: $test ..."
+
+	sh $testinput >"$OUTPUT" 2>&1
+
+	if ! diff -u $BASE/output/"$test" "$OUTPUT"; then
+		echo "Test $test failed" >&2
+		exit 1
+	fi
+done
+

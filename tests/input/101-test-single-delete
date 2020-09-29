@@ -1,0 +1,4 @@
+psql -c "
+	DELETE FROM r53db.route53_db
+	WHERE name ~ '^test.route53' AND data='10.53.53.60'
+"

@@ -1,0 +1,3 @@
+module_pathname = '$libdir/r53db.so'
+comment = 'Foreign Data Wrapper for AWS Route53'
+default_version = '0.1'

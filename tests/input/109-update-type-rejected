@@ -1,0 +1,5 @@
+psql -c "
+	UPDATE r53db.route53_db
+	SET type = 'TXT'
+	WHERE name ~ '^test'
+"

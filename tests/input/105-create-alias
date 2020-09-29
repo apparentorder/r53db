@@ -1,0 +1,5 @@
+psql -c "
+	INSERT INTO r53db.route53_db
+	(name, type, at_dns_name, at_hosted_zone_id)
+	VALUES ('alias.route53.db.', 'A', 's3-website.eu-central-1.amazonaws.com.', 'Z21DNDUVLTQW6Q')
+"

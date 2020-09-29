@@ -1,0 +1,28 @@
+package main
+
+// ------------------------------------------------------------------------
+// (!) GENERATED FROM C.go.in
+// ------------------------------------------------------------------------
+// Define CFLAGS, LDFLAGS using options from pg_config.
+
+/*
+
+#cgo CFLAGS: -I${PG_CONFIG_INCLUDEDIR_SERVER} -I/usr/local/include -Wall -Werror
+#cgo LDFLAGS: -Wl,-unresolved-symbols=ignore-all -fPIC
+
+//
+// Regarding /usr/local/include: This is required on FreeBSD for
+// libintl.h (gettext-runtime) and it does not hurt on other systems.
+//
+// Regarding unresolved-symbols=ignore-all: Shit is weird:
+//
+// | /tmp/go-build361859332/b001/_x003.o: In function `r53db_hi':
+// | ./pg.c:9: undefined reference to `palloc'
+// | collect2: error: ld returned 1 exit status
+//
+// => https://stackoverflow.com/questions/56114539/undefined-reference-to-palloc
+//
+
+*/
+import "C"
+

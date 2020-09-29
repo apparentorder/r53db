@@ -1,0 +1,9 @@
+psql -Aqt -c "
+	select 1
+	from information_schema._pg_foreign_tables
+	where
+		foreign_table_schema='r53db'
+		and foreign_table_name='route53_db'
+		and ftoptions::text ~ 'dns_name=route53.db.'
+"
+

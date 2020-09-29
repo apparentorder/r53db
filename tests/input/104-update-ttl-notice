@@ -1,0 +1,5 @@
+psql -c "
+	INSERT INTO r53db.route53_db
+	(name, type, ttl, data)
+	VALUES ('test.route53.db.', 'A', 53, '10.0.0.0')
+"

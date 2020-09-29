@@ -1,0 +1,5 @@
+psql -c "
+	DELETE FROM r53db.route53_db
+	WHERE NOT (name = 'route53.db.' AND type IN ('NS', 'SOA'))
+" \
+| sed 's/DELETE [0-9].*/DELETE/'

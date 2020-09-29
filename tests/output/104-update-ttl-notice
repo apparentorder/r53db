@@ -1,0 +1,2 @@
+NOTICE:  Rows added to an existing RRSet cannot have a different TTL; using the RRSet's TTL (300) instead
+INSERT 0 1

@@ -1,0 +1,5 @@
+psql -c "
+	CREATE SERVER r53db
+	FOREIGN DATA WRAPPER r53db
+"
+

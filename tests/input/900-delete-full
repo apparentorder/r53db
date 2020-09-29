@@ -1,0 +1,9 @@
+psql -c "
+        DELETE FROM r53db.route53_db
+        WHERE name ~ '^test.*\.route53.db.';
+"
+
+psql -Aqt -c "
+        SELECT COUNT(*) FROM r53db.route53_db
+        WHERE name ~ '^test.*\.route53.db.';
+"
