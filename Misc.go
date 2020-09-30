@@ -5,22 +5,22 @@ import (
 	// #include "dns.h"
 	"C"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/aws/external"
-	"github.com/aws/aws-sdk-go-v2/service/route53"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/route53"
 )
 
 var awsConnected bool = false
 var cfg aws.Config
-var r53 *route53.Client
+var r53 *route53.Route53
 
 func awsConnect() {
 	if !awsConnected {
-		cfg, err := external.LoadDefaultAWSConfig()
+		session, err := session.NewSession()
 		if err != nil {
 			error("unable to load SDK config, " + err.Error())
 		}
-		r53 = route53.New(cfg);
+		r53 = route53.New(session);
 
 		awsConnected = true
 	}

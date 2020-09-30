@@ -7,11 +7,10 @@ import (
 	// #include "fdw.h"
 	"C"
 
-	"context"
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go-v2/service/route53"
+	"github.com/aws/aws-sdk-go/service/route53"
 )
 
 //export r53dbGoBeginScan
@@ -37,13 +36,13 @@ func rrSetFromRow(row *C.r53dbDNSRR) *route53.ResourceRecordSet {
 
 	r53rr := route53.ResourceRecordSet{
 		Name: GoCharStringPtr(row.name),
-		Type: route53.RRType(C.GoString(row._type)),
+		Type: GoStringPtr(C.GoString(row._type)),
 	}
 
 	if row.at_dns_name == nil {
 		r53rr.TTL = GoInt64Ptr(row.ttl)
-		r53rr.ResourceRecords = []route53.ResourceRecord{
-			route53.ResourceRecord{
+		r53rr.ResourceRecords = []*route53.ResourceRecord{
+			&route53.ResourceRecord{
 				Value: GoCharStringPtr(row.data),
 			},
 		}
@@ -64,7 +63,7 @@ func rowsFromRRSet(rrset *route53.ResourceRecordSet) []*C.r53dbDNSRR {
 	if rrset.AliasTarget != nil {
 		row := C.r53dbNewDNSRR()
 		row.name = C.CString(*rrset.Name)
-		row._type = C.CString(string(rrset.Type))
+		row._type = C.CString(string(*rrset.Type))
 		row.at_dns_name = C.CString(*(*rrset.AliasTarget).DNSName)
 		row.at_hosted_zone_id = C.CString(*(*rrset.AliasTarget).HostedZoneId)
 		row.at_evaluate_target_health = (C.bool) (*(*rrset.AliasTarget).EvaluateTargetHealth)
@@ -75,7 +74,7 @@ func rowsFromRRSet(rrset *route53.ResourceRecordSet) []*C.r53dbDNSRR {
 	for _, rr := range rrset.ResourceRecords {
 		row := C.r53dbNewDNSRR()
 		row.name = C.CString(*rrset.Name)
-		row._type = C.CString(string(rrset.Type))
+		row._type = C.CString(string(*rrset.Type))
 		row.ttl = (C.uint32_t) (int32(*rrset.TTL))
 		row.data = C.CString(*rr.Value)
 		rows = append(rows, row)
@@ -85,7 +84,7 @@ func rowsFromRRSet(rrset *route53.ResourceRecordSet) []*C.r53dbDNSRR {
 }
 
 
-func getExistingRRSet(rname string, rtype route53.RRType, hosted_zone_id string) *route53.ResourceRecordSet {
+func getExistingRRSet(rname string, rtype string, hosted_zone_id string) *route53.ResourceRecordSet {
 	if !strings.HasSuffix(rname, ".") {
 		rname += "."
 	}
@@ -93,33 +92,32 @@ func getExistingRRSet(rname string, rtype route53.RRType, hosted_zone_id string)
 	lhzInput := route53.ListResourceRecordSetsInput{
 		HostedZoneId: &hosted_zone_id,
 		StartRecordName: &rname,
-		StartRecordType: rtype,// route53.RRType(rtype),
+		StartRecordType: &rtype,
 		MaxItems: GoStringPtr("1"),
 	}
 
-	lhzReq := r53.ListResourceRecordSetsRequest(&lhzInput)
-	resp, err := lhzReq.Send(context.TODO())
-	if err != nil {
+	lhzReq, lhzResp := r53.ListResourceRecordSetsRequest(&lhzInput)
+	if err := lhzReq.Send(); err != nil {
 		error("ListResourceRecordSets: " + err.Error())
 		return nil;
 	}
 
-	if len(resp.ResourceRecordSets) == 0 {
+	if len(lhzResp.ResourceRecordSets) == 0 {
 		return nil;
 	}
 
 	// Route53 might return entries that are *after* what we're looking
 	// for. That means there was no match.
 
-	if *resp.ResourceRecordSets[0].Name != rname {
+	if *lhzResp.ResourceRecordSets[0].Name != rname {
 		return nil
 	}
 
-	if resp.ResourceRecordSets[0].Type != rtype {
+	if *lhzResp.ResourceRecordSets[0].Type != rtype {
 		return nil
 	}
 
-	return &resp.ResourceRecordSets[0]
+	return lhzResp.ResourceRecordSets[0]
 }
 
 func removeRRbyIndex(r []route53.ResourceRecord, index int) []route53.ResourceRecord {
@@ -160,7 +158,7 @@ func mergeWithExistingRRSet(
 			return nil
 		}
 
-		if newRow.Type != oldRow.Type {
+		if *newRow.Type != *oldRow.Type {
 			error("r53db: RRSet Type cannot be changed in UPDATE")
 			return nil
 		}
@@ -209,7 +207,7 @@ func mergeWithExistingRRSet(
 
 	dataToRemove := oldRow.ResourceRecords[0].Value
 
-	replacedRRs := []route53.ResourceRecord{}
+	replacedRRs := []*route53.ResourceRecord{}
 
 	for _, r := range existingRRSet.ResourceRecords {
 		if *r.Value != *dataToRemove {
@@ -233,12 +231,12 @@ func r53dbGoModifyDNSRR(cid *C.char, cNewRR *C.r53dbDNSRR, cOldRR *C.r53dbDNSRR,
 	oldRow := rrSetFromRow(cOldRR)
 
 	var rrsName string
-	var rrsType route53.RRType
+	var rrsType string
 
 	if newRow != nil {
-		rrsName, rrsType = *newRow.Name, newRow.Type
+		rrsName, rrsType = *newRow.Name, *newRow.Type
 	} else {
-		rrsName, rrsType = *oldRow.Name, oldRow.Type
+		rrsName, rrsType = *oldRow.Name, *oldRow.Type
 	}
 
 	existingRRSet := getExistingRRSet(rrsName, rrsType, hosted_zone_id)
@@ -247,9 +245,9 @@ func r53dbGoModifyDNSRR(cid *C.char, cNewRR *C.r53dbDNSRR, cOldRR *C.r53dbDNSRR,
 	params := route53.ChangeResourceRecordSetsInput{
 		HostedZoneId: &hosted_zone_id,
 		ChangeBatch: &route53.ChangeBatch{
-			Changes: []route53.Change{
-				route53.Change{
-					Action: "UPSERT",
+			Changes: []*route53.Change{
+				&route53.Change{
+					Action: GoStringPtr("UPSERT"),
 					ResourceRecordSet: mergedRRSet,
 				},
 			},
@@ -264,13 +262,12 @@ func r53dbGoModifyDNSRR(cid *C.char, cNewRR *C.r53dbDNSRR, cOldRR *C.r53dbDNSRR,
 	// As a hack, we use the same logic to DELETE an AliasTarget entry.
 	if op == C.DML_DELETE && len(mergedRRSet.ResourceRecords) == 0 && mergedRRSet.AliasTarget == nil {
 		debug(fmt.Sprintf("RRSet %s is empty -- DELETEing the whole RRSet", *mergedRRSet.Name))
-		params.ChangeBatch.Changes[0].Action = "DELETE"
+		params.ChangeBatch.Changes[0].Action = GoStringPtr("DELETE")
 		params.ChangeBatch.Changes[0].ResourceRecordSet = existingRRSet
 	}
 
-	req := r53.ChangeResourceRecordSetsRequest(&params)
-	_, err := req.Send(context.TODO())
-	if err != nil {
+	req, _ := r53.ChangeResourceRecordSetsRequest(&params)
+	if err := req.Send(); err != nil {
 		error("ChangeResourceRecordSets: " + err.Error())
 		return false
 	}
@@ -280,42 +277,61 @@ func r53dbGoModifyDNSRR(cid *C.char, cNewRR *C.r53dbDNSRR, cOldRR *C.r53dbDNSRR,
 
 //export r53dbGoGetZones
 func r53dbGoGetZones(zoneList *C.char) *C.char {
-	lhzReq := r53.ListHostedZonesRequest(&route53.ListHostedZonesInput{})
-	lhzp := route53.NewListHostedZonesPaginator(lhzReq)
-	for lhzp.Next(context.TODO()) {
-		lhzPage := lhzp.CurrentPage()
-		for _, zone := range lhzPage.HostedZones {
+	var marker *string = nil
+	var truncated = true
+
+	for truncated {
+		lhzReq, lhzResp := r53.ListHostedZonesRequest(&route53.ListHostedZonesInput{
+			Marker: marker,
+		})
+		if err := lhzReq.Send(); err != nil {
+			error("ListHostedZones: " + err.Error())
+		}
+
+		for _, zone := range lhzResp.HostedZones {
 			czone := C.r53dbNewZone()
 			czone.id = C.CString(*zone.Id)
 			czone.name = C.CString(*zone.Name)
 			zoneList = C.r53dbStoreZone(zoneList, czone)
 		}
-	}
 
-	if err := lhzp.Err(); err != nil {
-		error("ListHostedZones: " + err.Error())
+		truncated = *lhzResp.IsTruncated
+		marker = lhzResp.NextMarker
 	}
 
 	return zoneList
 }
 
 func StoreDNSResults(scanState *C.char, hosted_zone_id string) {
-	rrReq := r53.ListResourceRecordSetsRequest(&route53.ListResourceRecordSetsInput{
-		HostedZoneId: &hosted_zone_id,
-	})
-	rrp := route53.NewListResourceRecordSetsPaginator(rrReq)
-	for rrp.Next(context.TODO()) {
-		rrpage := rrp.CurrentPage()
-		for _, rrset := range rrpage.ResourceRecordSets {
-			for _, row := range rowsFromRRSet(&rrset) {
+	var nextRName *string
+	var nextRType *string
+	var nextRIdent *string
+	var truncated = true
+
+	for truncated {
+		rrReq, rrResp := r53.ListResourceRecordSetsRequest(&route53.ListResourceRecordSetsInput{
+			HostedZoneId: &hosted_zone_id,
+			StartRecordName: nextRName,
+			StartRecordType: nextRType,
+			StartRecordIdentifier: nextRIdent,
+			MaxItems: GoStringPtr("2"),
+		})
+
+		if err := rrReq.Send(); err != nil {
+			error("r53db: StoreDNSResults(), ListResourceRecordSets: " + err.Error())
+			return
+		}
+
+		for _, rrset := range rrResp.ResourceRecordSets {
+			for _, row := range rowsFromRRSet(rrset) {
 				C.r53dbStoreResult(scanState, row)
 			}
 		}
-	}
 
-	if err := rrp.Err(); err != nil {
-		error("r53db: StoreDNSResults(), ListResourceRecordSets: " + err.Error())
-		return
+		truncated = *rrResp.IsTruncated
+		nextRName = rrResp.NextRecordName
+		nextRType = rrResp.NextRecordType
+		nextRIdent = rrResp.NextRecordIdentifier
 	}
 }
 
