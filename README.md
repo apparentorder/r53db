@@ -164,6 +164,18 @@ cd r53db
 make clean all install
 ```
 
+## Roadmap
+
+In no particular order:
+
+- Support explicit AWS authentication (using access/secret key / different profiles; possibly with PostgreSQL User Mappings.)
+- Performance improvements (especially grouping of multi-row operations)
+- Proper testing framework
+- Support more advanced Route53 record types
+- Reading values from DNS instead of the API, to leverage the full power of the Route53 Database
+- Implement FDW callbacks for `EXPLAIN`, `ANALYZE` etc.
+- Improved error reporting using `ereport()`
+
 ## Misc
 
 This project was born from a [silly running gag](https://www.lastweekinaws.com/podcast/aws-morning-brief/whiteboard-confessional-route-53-db/).
