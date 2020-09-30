@@ -22,7 +22,7 @@ You'll need:
 
 - An AWS environment (working `~/.aws/config` or assigned Instance Role etc.) with the necessary permissions (see below)
 - Golang 1.13+
-- AWS Go SDK v2
+- AWS Go SDK (v1)
 - PostgreSQL 9.6+, including `pg_config` and development files (headers)
 
 r53db has been successfully tested on:
@@ -100,7 +100,7 @@ Afterwards continue with the in-database installation (see above).
 
 ```
 pkg install go git-lite gettext
-go get github.com/aws/aws-sdk-go-v2/aws
+go get github.com/aws/aws-sdk-go
 
 git clone https://github.com/apparentorder/r53db.git
 cd r53db
@@ -126,7 +126,7 @@ Adjust the installation of `-devel` package names when using the official Postgr
 apt-get install make golang-1.14 git
 #apt-get install postgresql-server-dev-11 # for Debian-provided PostgreSQL
 PATH=/usr/lib/go-1.14/bin:$PATH
-go get github.com/aws/aws-sdk-go-v2/aws
+go get github.com/aws/aws-sdk-go
 
 git clone https://github.com/apparentorder/r53db.git
 cd r53db
@@ -140,7 +140,7 @@ Adjust the installation of `-dev` package names when using the official PostgreS
 ```
 apt-get install make golang git
 #apt-get install postgresql-12 postgresql-server-dev-12 # for Ubuntu-provided PostgreSQL
-go get github.com/aws/aws-sdk-go-v2/aws
+go get github.com/aws/aws-sdk-go
 
 git clone https://github.com/apparentorder/r53db.git
 cd r53db
