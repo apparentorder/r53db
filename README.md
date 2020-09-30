@@ -1,8 +1,10 @@
 # Route53 Database access from PostgreSQL
 
-*r53db* is a Foreign Data Wrapper for PostgreSQL that enables you to access AWS Route53 Database Zones like SQL tables.
+*r53db* is a Foreign Data Wrapper for PostgreSQL that enables you to access AWS Route53 Database
+Zones like SQL tables.
 
-*r53db* supports reading from (`SELECT`) and writing to (`INSERT`/`UPDATE`/`DELETE`) your Route53 Database for simple records and [ALIAS Targets](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html).
+*r53db* supports reading from (`SELECT`) and writing to (`INSERT`/`UPDATE`/`DELETE`) your Route53
+Database for simple records and [ALIAS Targets](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resource-record-sets-choosing-alias-non-alias.html).
 
 More advanced Route53 Database features like weights, geo-location etc. are not supported... *yet*!
 
@@ -20,7 +22,8 @@ Many folks prefer video, and I like [asciinema](https://asciinema.org), so here 
 
 You'll need:
 
-- An AWS environment (working `~/.aws/config` or assigned Instance Role etc.) with the necessary permissions (see below)
+- An AWS environment (working `~/.aws/config` or assigned Instance Role etc.) with the necessary
+  permissions (see below)
 - Golang 1.13+
 - AWS Go SDK (v1)
 - PostgreSQL 9.6+, including `pg_config` and development files (headers)
@@ -34,7 +37,8 @@ r53db has been successfully tested on:
 
 Other OS should work as well, if they meet the above list.
 
-You'll be happy to know that it's working on 64-bit ARM as well, so you can use those nice [AWS Graviton](https://aws.amazon.com/ec2/graviton/) instances!
+You'll be happy to know that it's working on 64-bit ARM as well, so you can use those nice
+[AWS Graviton](https://aws.amazon.com/ec2/graviton/) instances!
 
 ### IAM Permissions for Route53
 
@@ -42,7 +46,8 @@ The following permissions are required:
 
 - [ListHostedZones](https://docs.aws.amazon.com/Route53/latest/APIReference/API_ListHostedZones.html)
 - [ListResourceRecordSets](https://docs.aws.amazon.com/Route53/latest/APIReference/API_ListResourceRecordSets.html)
-- [ChangeResourceRecordSets](https://docs.aws.amazon.com/Route53/latest/APIReference/API_ChangeResourceRecordSets.html) (you can leave this out if you want to start with read-only access to Route53)
+- [ChangeResourceRecordSets](https://docs.aws.amazon.com/Route53/latest/APIReference/API_ChangeResourceRecordSets.html)
+  (you can leave this out if you want to start with read-only access to Route53)
 
 
  You can create an IAM Policy using the following document:
@@ -73,9 +78,11 @@ When all prerequisites have been met, the general procedure is just:
 
 `make clean all install`.
 
-PostgreSQL installation directory and header files will be located using `pg_config`. If you have multiple PostgreSQL installations, you can point to the right one by setting `$PG_CONFIG`.
+PostgreSQL installation directory and header files will be located using `pg_config`. If you have multiple
+PostgreSQL installations, you can point to the right one by setting `$PG_CONFIG`.
 
-After installation, use the `psql` client to connect to your database. Install the extension and hook it up to your Route53 Database:
+After installation, use the `psql` client to connect to your database. Install the extension and hook
+it up to your Route53 Database:
 
 ```
 CREATE EXTENSION r53db;
@@ -84,15 +91,22 @@ CREATE SCHEMA route53;
 IMPORT FOREIGN SCHEMA dummy FROM SERVER route53 INTO route53;
 ```
 
-The schema name `route53` is just a suggestion, you can change it if you like (or don't create a separate schema and import into the default  `public` schema).
+The schema name `route53` is just a suggestion, you can change it if you like (or don't create a separate
+schema and import into the default  `public` schema).
 
-The `IMPORT FOREIGN SCHEMA` command will create a Foreign Table for each Hosted Zone in your Route53 Database. DNS Names are adjusted to be easy-to-use PostgreSQL table names (e.g. the Hosted Zone `example.com` would become `example_com`).
+The `IMPORT FOREIGN SCHEMA` command will create a Foreign Table for each Hosted Zone in your Route53 Database.
+
+DNS Names are adjusted to be easy-to-use PostgreSQL table names (e.g. the Hosted Zone `example.com` would
+become `example_com`).
 
 Run `\dE+ route53.` (note the terminal `.`) afterwards to verify that the foreign tables have been added.
 
 ### OS-specific hints
 
-These hints assume that PostgreSQL is already installed. Adjust as necessary.
+Some hints for specific OS.
+
+Usually your PostgreSQL will already be there, of course. The installation for PostgreSQL is shown anyway,
+commented-out, as a reference for testing and possibly to locate the package containing the header files.
 
 Afterwards continue with the in-database installation (see above).
 
@@ -100,6 +114,7 @@ Afterwards continue with the in-database installation (see above).
 
 ```
 pkg install go git-lite gettext
+#pkg install postgresql12-server        # for FreeBSD's PostgreSQL package
 go get github.com/aws/aws-sdk-go
 
 git clone https://github.com/apparentorder/r53db.git
@@ -111,7 +126,9 @@ make clean all install
 
 ```
 yum install golang git make
-#yum install libpq-devel postgresql-server-devel # for AWS-provided PostgreSQL
+#amazon-linux-extras install postgresql11           # for AWS-provided PostgreSQL
+#yum install libpq-devel postgresql-server{,-devel} # for AWS-provided PostgreSQL
+go get github.com/aws/aws-sdk-go
 
 git clone https://github.com/apparentorder/r53db.git
 cd r53db
@@ -124,7 +141,7 @@ Adjust the installation of `-devel` package names when using the official Postgr
 
 ```
 apt-get install make golang-1.14 git
-#apt-get install postgresql-server-dev-11 # for Debian-provided PostgreSQL
+#apt-get install postgresql-11 postgresql-server-dev-11 # for Debian-provided PostgreSQL
 PATH=/usr/lib/go-1.14/bin:$PATH
 go get github.com/aws/aws-sdk-go
 
@@ -151,9 +168,15 @@ make clean all install
 
 This project was born from a [silly running gag](https://www.lastweekinaws.com/podcast/aws-morning-brief/whiteboard-confessional-route-53-db/).
 
-In that spirit, this project was meant as a gag as well. Unfortunately, I've severely underestimated how much time I'd have to invest if I make bad design decisions (for example, rolling my own in Golang, instead of doing the Right Thing and using [Multicorn](https://multicorn.org), or using the AWS Go SDK v2 which gets a full makeover literally the day before I wanted to release this baby). So now we're here, and now it feels more like a project than like a gag.
+In that spirit, this project was meant as a gag as well. Unfortunately, I've severely underestimated
+how much time I'd have to invest if I make bad design decisions -- for example, rolling my own in Golang,
+instead of doing the Right Thing and using [Multicorn](https://multicorn.org), or using the AWS Go SDK v2
+which gets a full makeover literally the day before I wanted to release this baby.
+So now we're here, and now it feels more like a project than like a gag.
 
-And who knows -- I can actually imagine this being useful in some contexts, like the use-case described in that link. After all, if you have a lot of configuration data in PostgreSQL anyway, it's a small jump from there to maintaining DNS data as well.
+And who knows -- I can actually imagine this being useful in some contexts, like the use-case described
+in that link. After all, if you have a lot of configuration data in PostgreSQL anyway, it's a small
+jump from there to maintaining DNS data as well.
 
 Either way, let me know if you find this useful at all!
 
@@ -169,5 +192,7 @@ I'm sure there's more.
 
 For suggestions, bugs, pull requests etc. please use [Github](https://github.com/apparentorder/r53db).
 
-For everything else: I'm trying to get used to Twitter as [@apparentorder](https://twitter.com/apparentorder). Or try legacy message delivery using apparentorder@neveragain.de. Also I'm old enough to use IRC -- I'm hiding somewhere in `##aws` (Freenode).
+For everything else: I'm trying to get used to Twitter as [@apparentorder](https://twitter.com/apparentorder).
+Or try legacy message delivery using apparentorder@neveragain.de.
+Also I'm old enough to use IRC -- I'm hiding somewhere in `##aws` (Freenode).
 
