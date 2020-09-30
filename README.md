@@ -139,7 +139,7 @@ Adjust the installation of `-dev` package names when using the official PostgreS
 
 ```
 apt-get install make golang git
-#apt-get install postgresql-11 postgresql-server-dev-11 # for Ubuntu-provided PostgreSQL
+#apt-get install postgresql-12 postgresql-server-dev-12 # for Ubuntu-provided PostgreSQL
 go get github.com/aws/aws-sdk-go-v2/aws
 
 git clone https://github.com/apparentorder/r53db.git
@@ -151,7 +151,7 @@ make clean all install
 
 This project was born from a [silly running gag](https://www.lastweekinaws.com/podcast/aws-morning-brief/whiteboard-confessional-route-53-db/).
 
-In that spirit, this project was meant as a gag as well. Unfortunately, I've severely underestimated how much time I'd have to invest if I make bad design decisions (for example, rolling my own in Golang, instead of doing the Right Thing and using [Multicorn](https://multicorn.org)). So now we're here and it feels more like a project than like a gag.
+In that spirit, this project was meant as a gag as well. Unfortunately, I've severely underestimated how much time I'd have to invest if I make bad design decisions (for example, rolling my own in Golang, instead of doing the Right Thing and using [Multicorn](https://multicorn.org), or using the AWS Go SDK v2 which gets a full makeover literally the day before I wanted to release this baby). So now we're here, and now it feels more like a project than like a gag.
 
 And who knows -- I can actually imagine this being useful in some contexts, like the use-case described in that link. After all, if you have a lot of configuration data in PostgreSQL anyway, it's a small jump from there to maintaining DNS data as well.
 
