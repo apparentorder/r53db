@@ -1,37 +1,28 @@
 # More examples of r53db usage
 
-### Add IPv6 to ALIAS Targets
+### Using inet operators
 
-As you are a good net citizen, you're keen on adding IPv6 support to your public-facing services!
-You gotta start somewhere, you know. And it's the *only* place where AWS *lets* you start.
-
-Assume we have some DNS names pointing to some ALIAS targets:
+PostgreSQL has a data type for IP addresses, `inet`. You can use it, for example, to select
+addresses that are contained in specific CIDR blocks:
 ```
-postgres=# select name, type, at_dns_name from route53.cmdu_de where at_dns_name is not null;
-       name       | type |                     at_dns_name                      
-------------------+------+------------------------------------------------------
- cmdu.de.         | A    | s3-website.eu-central-1.amazonaws.com.
- blergh.cmdu.de.  | A    | d-pr5rizm6m3.execute-api.eu-central-1.amazonaws.com.
- www.cmdu.de.     | A    | s3-website.eu-central-1.amazonaws.com.
- wwwtest.cmdu.de. | A    | s3-website.eu-central-1.amazonaws.com.
-(4 rows)
+postgres=# select name, type, data from route53.cmdu_de
+postgres-# where type='A' and data::inet <<= '10.192.0.0/19';
+     name     | type |    data     
+--------------+------+-------------
+ foo.cmdu.de. | A    | 10.192.0.3
+ foo.cmdu.de. | A    | 10.192.10.3
+(2 rows)
 ```
 
-Now let's do a clever `INSERT INTO ... SELECT` to add our IPv6 records:
+Of course it knows about IPv6, too!
 ```
-postgres=# insert into route53.cmdu_de (name, type, at_dns_name, at_hosted_zone_id)
-postgres-# select name, 'AAAA', at_dns_name, at_hosted_zone_id
-postgres-# from route53.cmdu_de 
-postgres-# where at_dns_name is not null AND type='A'
-postgres-# returning name, type, at_dns_name;
-
-       name       | type |                     at_dns_name                      
-------------------+------+------------------------------------------------------
- cmdu.de.         | AAAA | s3-website.eu-central-1.amazonaws.com.
- blergh.cmdu.de.  | AAAA | d-pr5rizm6m3.execute-api.eu-central-1.amazonaws.com.
- www.cmdu.de.     | AAAA | s3-website.eu-central-1.amazonaws.com.
- wwwtest.cmdu.de. | AAAA | s3-website.eu-central-1.amazonaws.com.
-(4 rows)
+postgres=# select name, type, data from route53.cmdu_de
+postgres-# where type='AAAA' and data::inet <<= '2001:db8::/64';
+     name     | type |      data       
+--------------+------+-----------------
+ bar.cmdu.de. | AAAA | 2001:db8::53
+ bar.cmdu.de. | AAAA | 2001:db8::53:53
+(2 rows)
 ```
 
 ### Comparing different zones
@@ -58,31 +49,6 @@ postgres-# inner join route53.route53_db zone_b using (data);
 --------------+------+------------+----------------------
  bar.cmdu.de. | A    | 10.53.0.23 | kallisti.route53.db.
 (1 row)
-```
-
-### Using inet operators
-
-PostgreSQL has a data type for IP addresses, `inet`. You can use it, for example, to select
-addresses that are contained in specific CIDR blocks:
-```
-postgres=# select name, type, data from route53.cmdu_de
-postgres-# where type='A' and data::inet <<= '10.192.0.0/19';
-     name     | type |    data     
---------------+------+-------------
- foo.cmdu.de. | A    | 10.192.0.3
- foo.cmdu.de. | A    | 10.192.10.3
-(2 rows)
-```
-
-Of course it knows about IPv6, too!
-```
-postgres=# select name, type, data from route53.cmdu_de
-postgres-# where type='AAAA' and data::inet <<= '2001:db8::/64';
-     name     | type |      data       
---------------+------+-----------------
- bar.cmdu.de. | AAAA | 2001:db8::53
- bar.cmdu.de. | AAAA | 2001:db8::53:53
-(2 rows)
 ```
 
 ### Updating ALIAS Targets
