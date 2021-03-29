@@ -192,11 +192,12 @@ jump from there to maintaining DNS data as well.
 
 Either way, let me know if you find this useful at all!
 
-### Prior Art
+### Similar Projects
 
 Similar projects that I'm aware of:
 
 - https://github.com/craftyphotons/ten34
+- https://www.npmjs.com/package/diggydb-nodejs
 
 I'm sure there's more.
 
